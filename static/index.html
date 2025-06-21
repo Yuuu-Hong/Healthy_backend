@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <title>用戶管理前端</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            background: linear-gradient(120deg, #f8fafc 0%, #e0e7ef 100%);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .main-container {
+            max-width: 430px;
+            margin: 40px auto 0 auto;
+            padding: 0 10px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 4px 16px rgba(60, 80, 120, 0.08);
+            padding: 28px 24px 20px 24px;
+            margin-bottom: 28px;
+            transition: box-shadow 0.2s;
+        }
+
+        .card:hover {
+            box-shadow: 0 8px 24px rgba(60, 80, 120, 0.13);
+        }
+
+        h2 {
+            color: #2d3a4b;
+            font-size: 1.3rem;
+            margin-top: 0;
+            margin-bottom: 18px;
+            letter-spacing: 1px;
+            border-left: 4px solid #5b9df9;
+            padding-left: 10px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 4px;
+            color: #5b6c8c;
+            font-size: 0.98rem;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="email"] {
+            width: 100%;
+            padding: 10px 12px;
+            margin-bottom: 14px;
+            border: 1px solid #cfd8dc;
+            border-radius: 6px;
+            font-size: 15px;
+            background: #f9fafc;
+            transition: border 0.2s;
+        }
+
+        input:focus {
+            border: 1.5px solid #5b9df9;
+            outline: none;
+        }
+
+        button {
+            background: linear-gradient(90deg, #5b9df9 60%, #6ed0f6 100%);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 22px;
+            font-size: 15px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            margin-top: 2px;
+            transition: background 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(91, 157, 249, 0.07);
+        }
+
+        button:hover {
+            background: linear-gradient(90deg, #357ae8 60%, #4ecbe6 100%);
+        }
+
+        .result,
+        #users-list {
+            background: #f1f3f6;
+            border-radius: 6px;
+            padding: 10px 12px;
+            margin-top: 6px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #2d3a4b;
+            word-break: break-all;
+            min-height: 18px;
+        }
+
+        #users-list {
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        @media (max-width: 600px) {
+            .main-container {
+                max-width: 98vw;
+                padding: 0 2vw;
+            }
+
+            .card {
+                padding: 18px 6px 14px 6px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-container">
+        <div class="card">
+            <h2>註冊</h2>
+            <label for="reg-username">帳號</label>
+            <input id="reg-username" type="text" placeholder="請輸入帳號">
+            <label for="reg-email">Email</label>
+            <input id="reg-email" type="email" placeholder="請輸入 Email">
+            <label for="reg-password">密碼</label>
+            <input id="reg-password" type="password" placeholder="請輸入密碼">
+            <button onclick="register()">註冊</button>
+            <div id="reg-result" class="result"></div>
+        </div>
+
+        <div class="card">
+            <h2>登入</h2>
+            <label for="login-username">帳號</label>
+            <input id="login-username" type="text" placeholder="請輸入帳號">
+            <label for="login-password">密碼</label>
+            <input id="login-password" type="password" placeholder="請輸入密碼">
+            <button onclick="login()">登入</button>
+            <div id="login-result" class="result"></div>
+        </div>
+
+        <div class="card">
+            <h2>所有用戶</h2>
+            <button onclick="getUsers()">查詢</button>
+            <pre id="users-list" class="result"></pre>
+        </div>
+    </div>
+    <script>
+        function register() {
+            fetch('/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: document.getElementById('reg-username').value,
+                    email: document.getElementById('reg-email').value,
+                    password: document.getElementById('reg-password').value
+                })
+            })
+                .then(res => res.json())
+                .then(data => document.getElementById('reg-result').innerText = JSON.stringify(data, null, 2));
+        }
+
+        function login() {
+            fetch('/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: document.getElementById('login-username').value,
+                    password: document.getElementById('login-password').value
+                })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('login-result').innerText = JSON.stringify(data, null, 2);
+                    if (data.message === "Login successful") {
+                        // 儲存用戶資訊
+                        localStorage.setItem('username', document.getElementById('login-username').value);
+                        // 跳轉到第二頁
+                        window.location.href = '/static/main.html';
+                    }
+                });
+        }
+
+        function getUsers() {
+            fetch('/users/')
+                .then(res => res.json())
+                .then(data => document.getElementById('users-list').innerText = JSON.stringify(data, null, 2));
+        }
+    </script>
+</body>
+
+</html>

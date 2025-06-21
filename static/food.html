@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <title>食物辨識上傳</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f8fafc;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 420px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 4px 16px rgba(60, 80, 120, 0.08);
+            padding: 28px 24px;
+        }
+
+        h2 {
+            color: #2d3a4b;
+            border-left: 4px solid #5b9df9;
+            padding-left: 10px;
+        }
+
+        input[type="file"] {
+            margin-bottom: 16px;
+        }
+
+        button {
+            background: linear-gradient(90deg, #5b9df9 60%, #6ed0f6 100%);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 22px;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: linear-gradient(90deg, #357ae8 60%, #4ecbe6 100%);
+        }
+
+        .result {
+            background: #f1f3f6;
+            border-radius: 6px;
+            padding: 10px 12px;
+            margin-top: 12px;
+            font-size: 14px;
+            color: #2d3a4b;
+            min-height: 18px;
+        }
+
+        #save-btn {
+            display: none;
+            margin-top: 18px;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>上傳食物照片</h2>
+        <input type="file" id="food-photo" accept="image/*">
+        <button onclick="uploadPhoto()">上傳並辨識</button>
+        <div id="upload-result" class="result"></div>
+        <button id="save-btn">保存</button>
+    </div>
+    <script>
+        // 美化食物辨識結果
+        function formatFoodResult(data) {
+            if (!data || !data.detected_foods || data.detected_foods.length === 0) {
+                return "未辨識到任何食物";
+            }
+            let str = "";
+            // 1. 食物名字
+            str += "🍽️ 食物名稱：\n";
+            data.detected_foods.forEach((food, idx) => {
+                str += `  ${idx + 1}. ${food.class_name}\n`;
+            });
+
+            // 2. 個別食物營養資訊
+            str += "\n📊 個別食物營養資訊：\n";
+            data.nutrition_info.forEach((info, idx) => {
+                if (info) {
+                    str += `  ${info.name}：\n`;
+                    str += `    卡路里：${info.calories} kcal\n`;
+                    str += `    蛋白質：${info.protein} g\n`;
+                    str += `    脂肪：${info.fat} g\n`;
+                    str += `    碳水化合物：${info.carbohydrates} g\n`;
+                    str += `    糖：${info.sugar} g\n`;
+                    str += `    膽固醇：${info.cholesterol} mg\n`;
+                } else {
+                    str += `  查無第${idx + 1}項食物營養資訊\n`;
+                }
+            });
+
+            // 3. 總營養資訊
+            if (data.total_nutrition) {
+                str += "\n🧮 總營養資訊：\n";
+                str += `  總卡路里：${data.total_nutrition.total_calories} kcal\n`;
+                str += `  總蛋白質：${data.total_nutrition.total_protein} g\n`;
+                str += `  總脂肪：${data.total_nutrition.total_fat} g\n`;
+                str += `  總碳水化合物：${data.total_nutrition.total_carbs} g\n`;
+                str += `  總糖：${data.total_nutrition.total_sugar} g\n`;
+                str += `  總膽固醇：${data.total_nutrition.total_cholesterol} mg\n`;
+            }
+            return str;
+        }
+
+        // 上傳食物照片
+        function uploadPhoto() {
+            const fileInput = document.getElementById('food-photo');
+            if (!fileInput.files.length) {
+                document.getElementById('upload-result').innerText = '請選擇照片';
+                return;
+            }
+            const formData = new FormData();
+            formData.append('photo', fileInput.files[0]);
+            formData.append('username', localStorage.getItem('username'));
+
+            fetch('/food/upload', {
+                method: 'POST',
+                body: formData
+            })
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('upload-result').innerText = formatFoodResult(data);
+                    showSaveButton();
+                })
+                .catch(err => {
+                    document.getElementById('upload-result').innerText = '上傳失敗';
+                });
+        }
+
+        // 顯示保存按鈕
+        function showSaveButton() {
+            document.getElementById('save-btn').style.display = 'block';
+        }
+
+        // 綁定保存按鈕事件：點擊後跳轉回 main.html
+        document.getElementById('save-btn').onclick = function () {
+            location.href = 'main.html';
+        };
+    </script>
+</body>
+
+</html>

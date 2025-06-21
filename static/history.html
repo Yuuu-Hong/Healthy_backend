@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <title>歷史飲食紀錄</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            background: linear-gradient(120deg, #f8fafc 0%, #e0e7ef 100%);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .main-container {
+            max-width: 600px;
+            margin: 40px auto 0 auto;
+            padding: 0 10px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 4px 16px rgba(60, 80, 120, 0.08);
+            padding: 28px 24px 20px 24px;
+            margin-bottom: 28px;
+            transition: box-shadow 0.2s;
+        }
+
+        .card:hover {
+            box-shadow: 0 8px 24px rgba(60, 80, 120, 0.13);
+        }
+
+        h2 {
+            color: #2d3a4b;
+            font-size: 1.3rem;
+            margin-top: 0;
+            margin-bottom: 18px;
+            letter-spacing: 1px;
+            border-left: 4px solid #5b9df9;
+            padding-left: 10px;
+        }
+
+        table.pretty-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: #f8fafc;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(91, 157, 249, 0.05);
+        }
+
+        .pretty-table th,
+        .pretty-table td {
+            padding: 10px 6px;
+            text-align: center;
+            border-bottom: 1.5px solid #e0e7ef;
+            border-right: 1.5px solid #e0e7ef;
+            font-size: 1em;
+        }
+
+        .pretty-table th:last-child,
+        .pretty-table td:last-child {
+            border-right: none;
+        }
+
+        .pretty-table th {
+            background: #f1f3f6;
+            color: #2d3a4b;
+            font-weight: 600;
+        }
+
+        .pretty-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .pretty-table tbody tr:hover {
+            background: #e6f0fa;
+        }
+
+        .date-row {
+            background: #e0e7ef !important;
+            font-weight: bold;
+            color: #357ae8;
+        }
+
+        .back-btn {
+            background: linear-gradient(90deg, #5b9df9 60%, #6ed0f6 100%);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 18px;
+            font-size: 15px;
+            cursor: pointer;
+            margin-bottom: 18px;
+        }
+
+        .back-btn:hover {
+            background: linear-gradient(90deg, #357ae8 60%, #4ecbe6 100%);
+        }
+
+        @media (max-width: 600px) {
+            .main-container {
+                max-width: 98vw;
+                padding: 0 2vw;
+            }
+
+            .card {
+                padding: 18px 6px 14px 6px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-container">
+        <div class="card">
+            <button class="back-btn" onclick="location.href='main.html'">← 返回主頁</button>
+            <h2>歷史飲食紀錄</h2>
+            <div style="overflow-x:auto;">
+                <table id="history-table" class="pretty-table">
+                    <thead>
+                        <tr>
+                            <th>時間</th>
+                            <th>食物名稱</th>
+                            <th>熱量</th>
+                            <th>蛋白質</th>
+                            <th>脂肪</th>
+                            <th>碳水</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script>
+        // 檢查登入
+        let username = localStorage.getItem('username');
+        if (!username) {
+            alert('請先登入！');
+            location.href = 'index.html';
+        }
+
+        // 載入歷史飲食
+        function loadHistory() {
+            fetch(`/food/history/${username}`)
+                .then(res => res.json())
+                .then(rows => {
+                    let tbody = document.querySelector('#history-table tbody');
+                    tbody.innerHTML = '';
+                    if (!rows.length) {
+                        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">尚無歷史紀錄</td></tr>';
+                        return;
+                    }
+                    let lastDate = '';
+                    rows.forEach(row => {
+                        let date = row.meal_time ? row.meal_time.slice(0, 10) : '';
+                        let time = row.meal_time ? row.meal_time.slice(11, 16) : '';
+                        if (date !== lastDate) {
+                            tbody.innerHTML += `<tr class="date-row"><td colspan="6">${date}</td></tr>`;
+                            lastDate = date;
+                        }
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${time}</td>
+                                <td>${row.food_name}</td>
+                                <td>${row.calories}</td>
+                                <td>${row.protein}</td>
+                                <td>${row.fat}</td>
+                                <td>${row.carb}</td>
+                            </tr>
+                        `;
+                    });
+                });
+        }
+
+        loadHistory();
+    </script>
+</body>
+
+</html>

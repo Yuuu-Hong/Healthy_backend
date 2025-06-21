@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <title>健康主頁</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background: linear-gradient(120deg, #f8fafc 0%, #e0e7ef 100%);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .main-container {
+            max-width: 480px;
+            margin: 40px auto 0 auto;
+            padding: 0 10px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 4px 16px rgba(60, 80, 120, 0.08);
+            padding: 28px 24px 20px 24px;
+            margin-bottom: 28px;
+            transition: box-shadow 0.2s;
+            position: relative;
+        }
+
+        .card:hover {
+            box-shadow: 0 8px 24px rgba(60, 80, 120, 0.13);
+        }
+
+        h2 {
+            color: #2d3a4b;
+            font-size: 1.3rem;
+            margin-top: 0;
+            margin-bottom: 18px;
+            letter-spacing: 1px;
+            border-left: 4px solid #5b9df9;
+            padding-left: 10px;
+        }
+
+        .tdee-info {
+            font-size: 1.08rem;
+            color: #2d3a4b;
+            margin-bottom: 12px;
+            line-height: 1.8;
+        }
+
+        .chart-container {
+            background: #f1f3f6;
+            border-radius: 10px;
+            padding: 18px 10px 10px 10px;
+            margin-bottom: 18px;
+            position: relative;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 18px;
+        }
+
+        button {
+            background: linear-gradient(90deg, #5b9df9 60%, #6ed0f6 100%);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 22px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: background 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(91, 157, 249, 0.07);
+        }
+
+        button:hover {
+            background: linear-gradient(90deg, #357ae8 60%, #4ecbe6 100%);
+        }
+
+        .nutrient-status {
+            font-size: 1.1em;
+            margin-right: 12px;
+            display: inline-block;
+            margin-bottom: 6px;
+        }
+
+        .nutrient-status.green {
+            color: #2ecc40;
+        }
+
+        .nutrient-status.red {
+            color: #e74c3c;
+        }
+
+        @media (max-width: 600px) {
+            .main-container {
+                max-width: 98vw;
+                padding: 0 2vw;
+            }
+
+            .card {
+                padding: 18px 6px 14px 6px;
+            }
+        }
+
+        /* 新增的 CSS */
+        .pretty-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: #f8fafc;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(91, 157, 249, 0.05);
+        }
+
+        .pretty-table th,
+        .pretty-table td {
+            padding: 10px 6px;
+            text-align: center;
+            border-bottom: 1.5px solid #e0e7ef;
+            border-right: 1.5px solid #e0e7ef;
+            font-size: 1em;
+        }
+
+        .pretty-table th:last-child,
+        .pretty-table td:last-child {
+            border-right: none;
+        }
+
+        .pretty-table th {
+            background: #f1f3f6;
+            color: #2d3a4b;
+            font-weight: 600;
+        }
+
+        .pretty-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .pretty-table tbody tr:hover {
+            background: #e6f0fa;
+        }
+
+        .logout-btn {
+            background: linear-gradient(90deg, #357ae8 60%, #6ed0f6 100%);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 18px;
+            font-size: 15px;
+            cursor: pointer;
+            margin-left: 12px;
+        }
+
+        .logout-btn:hover {
+            background: linear-gradient(90deg, #357ae8 60%, #6ed0f6 100%);
+        }
+
+        .upload-btn {
+            background: linear-gradient(90deg, #357ae8 60%, #6ed0f6 100%);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 18px;
+            font-size: 15px;
+            cursor: pointer;
+            margin-bottom: 8px;
+        }
+
+        .upload-btn:hover {
+            background: linear-gradient(90deg, #357ae8 60%, #4ecbe6 100%);
+        }
+
+        .cholesterol-limit {
+            position: absolute;
+            right: 32px;
+            bottom: 18px;
+            color: #2d3a4b;
+            font-size: 1.05rem;
+            font-weight: bold;
+        }
+
+        .diet-advice-card {
+            background: #e6f0fa;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(91, 157, 249, 0.07);
+            padding: 16px 18px 12px 18px;
+            margin-top: 0;
+            font-size: 1em;
+            color: #222;
+            line-height: 1.8;
+            max-width: 100%;
+            min-height: 32px;
+            border-top: none;
+            text-align: left;
+        }
+
+        .diet-advice-card ul {
+            margin: 0;
+            padding-left: 0;
+        }
+
+        .diet-advice-card li {
+            margin-bottom: 12px;
+            list-style: none;
+            position: relative;
+            padding-left: 2em;
+            text-indent: -1.2em;
+            line-height: 1.8;
+            border-radius: 0;
+            font-size: 1em;
+            color: #222;
+            word-break: break-all;
+            background: none;
+            /* 取消每則建議的背景 */
+        }
+
+        .diet-advice-card li:last-child {
+            margin-bottom: 0;
+        }
+
+        .diet-advice-card li:before {
+            content: "💡";
+            position: absolute;
+            left: 0.2em;
+            top: 0.9em;
+            transform: translateY(-50%);
+        }
+
+        .section-title,
+        .diet-advice-title {
+            font-weight: bold;
+            color: #000;
+            font-size: 1.08em;
+            display: inline-block;
+            margin-bottom: 8px;
+            padding-bottom: 2px;
+            padding-left: 0;
+            /* 讓兩個標題都靠左 */
+        }
+
+        .diet-advice-title {
+            border-bottom: 2px solid #000;
+            margin-top: 18px;
+            margin-left: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-container">
+        <!-- 卡片1：TDEE與登出 -->
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <h2>歡迎回來，<span id="username"></span>！</h2>
+                <button class="logout-btn" onclick="logout()">登出</button>
+            </div>
+            <div id="tdee-info" class="tdee-info"></div>
+            <div class="cholesterol-limit" id="cholesterol-limit"></div>
+        </div>
+        <!-- 卡片2：今日飲食（含建議） -->
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div class="section-title">今日飲食</div>
+                <button id="more-history-btn" style="font-size:0.95em; padding:4px 14px;">更多...</button>
+            </div>
+            <div style="overflow-x:auto;">
+                <table id="today-food-table" class="pretty-table">
+                    <thead>
+                        <tr>
+                            <th>時間</th>
+                            <th>食物名稱</th>
+                            <th>熱量</th>
+                            <th>蛋白質</th>
+                            <th>脂肪</th>
+                            <th>碳水</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="diet-advice-title">飲食建議</div>
+            <div id="diet-advice" class="diet-advice-card">
+                <div id="diet-advice-list"></div>
+            </div>
+        </div>
+        <!-- 卡片3：圖表與上傳 -->
+        <div class="card chart-container">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <div></div>
+                <button class="upload-btn" onclick="location.href='food.html'">上傳食物照片</button>
+            </div>
+            <canvas id="nutritionChart" width="360" height="220"></canvas>
+            <div id="nutrient-status" style="margin-top:10px;"></div>
+        </div>
+    </div>
+
+    <!-- Modal for profile input -->
+    <div id="profile-modal"
+        style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5);">
+        <div class="modal-content"
+            style="background:#fff; margin:10% auto; padding:20px; width:300px; border-radius:8px;">
+            <h3>請輸入個人基本資料</h3>
+            <form id="profile-form">
+                <label>年齡: <input type="number" name="age" required></label><br>
+                <label>性別:
+                    <select name="gender" required>
+                        <option value="male">男</option>
+                        <option value="female">女</option>
+                    </select>
+                </label><br>
+                <label>身高(cm): <input type="number" name="height" required></label><br>
+                <label>體重(kg): <input type="number" name="weight" required></label><br>
+                <label>運動習慣:
+                    <select name="activity" required>
+                        <option value="1.2">久坐</option>
+                        <option value="1.375">輕度運動</option>
+                        <option value="1.55">中度運動</option>
+                        <option value="1.725">重度運動</option>
+                        <option value="1.9">非常活躍</option>
+                    </select>
+                </label><br>
+                <button type="submit">儲存</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // 檢查是否有登入
+        let username = localStorage.getItem('username');
+        if (!username) {
+            alert('請先登入！');
+            location.href = 'index.html';
+        }
+        document.getElementById('username').textContent = username;
+
+        // 取得個人資料
+        function fetchProfile() {
+            fetch(`/api/profile/${username}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) {
+                        showModal();
+                    } else {
+                        hideModal();
+                        showTDEE(data);
+                        drawChart(data);
+                        loadTodayFoods(); // 加這一行
+                    }
+                });
+        }
+
+        // 顯示/隱藏 modal
+        function showModal() { document.getElementById('profile-modal').style.display = 'block'; }
+        function hideModal() { document.getElementById('profile-modal').style.display = 'none'; }
+
+        // 提交個人資料
+        document.getElementById('profile-form').onsubmit = function (e) {
+            e.preventDefault();
+            let form = e.target;
+            let profile = {
+                age: form.age.value,
+                gender: form.gender.value,
+                height: form.height.value,
+                weight: form.weight.value,
+                activity: form.activity.value
+            };
+            fetch(`/api/profile/${username}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(profile)
+            }).then(res => res.json()).then(() => {
+                hideModal();
+                fetchProfile();
+            });
+        };
+
+        // 計算TDEE與目標
+        function showTDEE(profile) {
+            let { age, gender, height, weight, activity } = profile;
+            age = Number(age); height = Number(height); weight = Number(weight);
+            // Mifflin-St Jeor公式
+            let bmr = gender === 'male'
+                ? 10 * weight + 6.25 * height - 5 * age + 5
+                : 10 * weight + 6.25 * height - 5 * age - 161;
+            let tdee = Math.round(bmr * Number(activity));
+            // 推薦比例
+            let protein = Math.round(weight * 1.2); // 1.2g/kg
+            let fat = Math.round(tdee * 0.25 / 9);  // 25%熱量
+            let carb = Math.round((tdee - (protein * 4 + fat * 9)) / 4);
+            let sugar = 50; // 上限
+            let cholesterol = 300; // 上限
+            document.getElementById('tdee-info').innerHTML = `
+                <b>每日TDEE：</b>${tdee} kcal<br>
+                <b>蛋白質目標：</b>${protein} g　<br>
+                <b>脂肪目標：</b>${fat} g　<br>
+                <b>碳水化合物目標：</b>${carb} g<br>
+                <b>糖上限：</b>${sugar} g　<br>
+                <b>膽固醇上限：</b>${cholesterol} mg
+            `;
+
+            // 儲存目標供圖表用
+            window.nutritionTarget = { tdee, protein, fat, carb, sugar, cholesterol };
+        }
+
+        // 畫圖表並顯示營養素狀態
+        function drawChart(profile) {
+            let target = window.nutritionTarget;
+            fetch(`/food/summary/${username}`)
+                .then(res => res.json())
+                .then(actual => {
+                    let ctx = document.getElementById('nutritionChart').getContext('2d');
+                    if (window.nutritionChart && typeof window.nutritionChart.destroy === 'function') {
+                        window.nutritionChart.destroy();
+                    }
+                    window.nutritionChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['熱量', '蛋白質', '脂肪', '碳水', '糖', '膽固醇'],
+                            datasets: [
+                                {
+                                    label: '今日攝取',
+                                    data: [actual.tdee, actual.protein, actual.fat, actual.carb, actual.sugar, actual.cholesterol],
+                                    backgroundColor: 'rgba(54, 162, 235, 0.7)'
+                                },
+                                {
+                                    label: '目標值',
+                                    data: [target.tdee, target.protein, target.fat, target.carb, target.sugar, target.cholesterol],
+                                    type: 'line',
+                                    borderColor: 'rgba(255,99,132,0.7)',
+                                    borderWidth: 2,
+                                    fill: false,
+                                    pointRadius: 0
+                                }
+                            ]
+                        },
+                        options: {
+                            plugins: {
+                                legend: { display: true }
+                            },
+                            scales: {
+                                y: { beginAtZero: true }
+                            }
+                        }
+                    });
+                    showNutrientStatus(actual, target);
+                    showDietAdvice(actual, target);
+                })
+                .catch(err => {
+                    console.error('summary fetch error:', err);
+                });
+        }
+
+        // 顯示營養素狀態
+        function showNutrientStatus(actual, target) {
+            const names = ['熱量', '蛋白質', '脂肪', '碳水', '糖', '膽固醇'];
+            const keys = ['tdee', 'protein', 'fat', 'carb', 'sugar', 'cholesterol'];
+            let html = '';
+            for (let i = 0; i < keys.length; i++) {
+                let value = actual[keys[i]];
+                let goal = target[keys[i]];
+                let status = '';
+                let color = '';
+                if (keys[i] === 'sugar' || keys[i] === 'cholesterol') {
+                    if (value > goal) {
+                        status = '⚠️';
+                        color = 'red';
+                    } else {
+                        status = '✅';
+                        color = 'green';
+                    }
+                } else {
+                    if (value < goal * 0.85) {
+                        status = '❌';
+                        color = 'red';
+                    } else if (value > goal * 1.15) {
+                        status = '⚠️';
+                        color = 'red';
+                    } else {
+                        status = '✅';
+                        color = 'green';
+                    }
+                }
+                html += `<span class="nutrient-status ${color}">${names[i]} ${status}</span>`;
+            }
+            document.getElementById('nutrient-status').innerHTML = html;
+        }
+
+        // 提供飲食建議
+        function showDietAdvice(actual, target) {
+            let advice = [];
+            // 熱量
+            if (actual.tdee < target.tdee * 0.85) advice.push("今日熱量攝取偏低，可適量增加主食或蛋白質");
+            else if (actual.tdee > target.tdee * 1.15) advice.push("今日熱量攝取偏高，建議減少高熱量食物");
+            // 蛋白質
+            if (actual.protein < target.protein * 0.85) advice.push("蛋白質攝取不足，可多吃豆魚蛋肉類");
+            else if (actual.protein > target.protein * 1.15) advice.push("蛋白質攝取偏高，請適量");
+            // 脂肪
+            if (actual.fat > target.fat * 1.15) advice.push("脂肪攝取偏高，建議減少油炸或高油食物");
+            // 碳水
+            if (actual.carb < target.carb * 0.85) advice.push("碳水攝取不足，可適量增加全穀雜糧");
+            else if (actual.carb > target.carb * 1.15) advice.push("碳水攝取偏高，請減少精緻澱粉");
+            // 糖
+            if (actual.sugar > target.sugar) advice.push("糖分攝取超標，請減少含糖飲料與甜食");
+            // 膽固醇
+            if (actual.cholesterol > target.cholesterol) advice.push("膽固醇攝取超標，請減少內臟、蛋黃等高膽固醇食物");
+
+            if (advice.length === 0) advice.push("今日營養攝取均衡，請持續保持！");
+            document.getElementById('diet-advice-list').innerHTML =
+                "<ul>" + advice.map(a => `<li>${a}</li>`).join("") + "</ul>";
+        }
+
+        // 登出
+        function logout() {
+            localStorage.removeItem('username');
+            location.href = 'index.html';
+        }
+
+        // JS 渲染表格時移除份量
+        function loadTodayFoods() {
+            fetch(`/food/today_foods/${username}`)
+                .then(res => res.json())
+                .then(foods => {
+                    let tbody = document.querySelector('#today-food-table tbody');
+                    tbody.innerHTML = '';
+                    if (!foods.length) {
+                        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">今日尚無紀錄</td></tr>';
+                        return;
+                    }
+                    foods.forEach(food => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${food.meal_time ? food.meal_time.slice(11, 16) : ''}</td>
+                                <td>${food.food_name}</td>
+                                <td>${food.calories}</td>
+                                <td>${food.protein}</td>
+                                <td>${food.fat}</td>
+                                <td>${food.carb}</td>
+                            </tr>
+                        `;
+                    });
+                });
+        }
+        document.getElementById('more-history-btn').onclick = function () {
+            location.href = 'history.html';
+        };
+
+        fetchProfile();
+    </script>
+</body>
+
+</html>
