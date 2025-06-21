@@ -52,4 +52,5 @@ ultralytics==8.3.128
 ultralytics-thop==2.0.14
 urllib3==2.4.0
 Werkzeug==3.1.3
+gdown
 # 其他你確定需要的套件
