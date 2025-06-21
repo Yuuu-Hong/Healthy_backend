@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Flask Fullstack App Backend
 
 This is the backend part of the Flask Fullstack Application. It provides APIs for user registration, login, and data management.
@@ -66,3 +67,6 @@ Contributions are welcome! Please open an issue or submit a pull request for any
 ## License
 
 This project is licensed under the MIT License. See the LICENSE file for details.
+=======
+# Healthy_backend
+>>>>>>> c45106bbfbc02b6c07bad9cae305850b43870839
