@@ -21,5 +21,26 @@ app.register_blueprint(users_bp, url_prefix='/users')
 app.register_blueprint(food_bp, url_prefix='/food')
 app.register_blueprint(profile_bp, url_prefix='/api')
 
+# --- 自動下載模型 ---
+def download_model_if_needed():
+    import gdown
+    MODEL_ID = "17CrR9ZCQ6FOg2F4P1x5qaryUzSZAkb2S"
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    MODEL_DIR = os.path.join(BASE_DIR, "models")
+    MODEL_PATH = os.path.join(MODEL_DIR, "best.pt")
+    os.makedirs(MODEL_DIR, exist_ok=True)
+    if not os.path.exists(MODEL_PATH):
+        print("Downloading YOLO model from Google Drive...")
+        url = f"https://drive.google.com/uc?id={MODEL_ID}"
+        try:
+            gdown.download(url, MODEL_PATH, quiet=False)
+            print("Download complete.")
+        except Exception as e:
+            print(f"Download failed: {e}")
+    else:
+        print("Model already exists.")
+
+download_model_if_needed()
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
