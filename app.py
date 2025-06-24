@@ -23,11 +23,15 @@ app.register_blueprint(profile_bp, url_prefix='/api')
 
 # --- 自動下載模型 ---
 def download_model_if_needed():
+    print("=== [DEBUG] 進入 download_model_if_needed ===")
     import gdown
     MODEL_ID = "17CrR9ZCQ6FOg2F4P1x5qaryUzSZAkb2S"
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     MODEL_DIR = os.path.join(BASE_DIR, "models")
     MODEL_PATH = os.path.join(MODEL_DIR, "best.pt")
+    print(f"BASE_DIR: {BASE_DIR}")
+    print(f"MODEL_DIR: {MODEL_DIR}")
+    print(f"MODEL_PATH: {MODEL_PATH}")
     os.makedirs(MODEL_DIR, exist_ok=True)
     if not os.path.exists(MODEL_PATH):
         print("Downloading YOLO model from Google Drive...")
